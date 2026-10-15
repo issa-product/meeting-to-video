@@ -8,7 +8,8 @@ Run `bash ~/.claude/skills/meeting-to-video/setup/doctor.sh`. It prints what's m
 | Python 3.10+ | layout assets, timing, audio | `brew install python` | `sudo apt-get install -y python3 python3-venv` |
 | Skill venv | numpy, pillow, requests | `python3 -m venv ~/.config/meeting-to-video/venv && ~/.config/meeting-to-video/venv/bin/pip install numpy pillow requests` | same |
 | Node.js 22+ | HyperFrames (motion graphics renderer, runs via npx, no global install) | `brew install node` | NodeSource / `nvm install 22` |
-| HyperFrames headless Chrome | renders the overlay | downloaded automatically on first `npx --yes hyperframes@0.7.60 render` (~150 MB) | same |
+| puppeteer-core (in the skill's own folder) | layout_audit.py measures the real overlay layout | `mkdir -p ~/.config/meeting-to-video/node && cd ~/.config/meeting-to-video/node && npm init -y && PUPPETEER_SKIP_DOWNLOAD=1 npm i puppeteer-core@23` | same |
+| HyperFrames headless Chrome | renders the overlay (layout_audit reuses it) | downloaded automatically on first `npx --yes hyperframes@0.7.60 render` (~150 MB) | same |
 | ElevenLabs API key | transcription (Scribe), sound effects, music | user creates it at elevenlabs.io → Settings → API keys and pastes it | same |
 
 Store the key (never echo it back, never put it in the project folder):
@@ -19,6 +20,8 @@ Validate it: `curl -s -o /dev/null -w '%{http_code}' -H "xi-api-key: <key>" http
 
 If `brew`/`apt` needs a password, give the user the exact command to run themselves and wait.
 Windows: use WSL2 (Ubuntu) and follow the Linux column.
+
+Fonts: SF Pro is used through the macOS system font (it can't be bundled); Inter (bundled) is the fallback on Linux.
 
 Optional (not required): the HyperFrames authoring skills (`npx --yes hyperframes@0.7.60 skills`) if you want
 HyperFrames' own docs available while customising the overlay.

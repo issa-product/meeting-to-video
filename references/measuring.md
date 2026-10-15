@@ -26,9 +26,11 @@ For each app/window seen during the share, grab a frame and find the content are
 - top: `$F rowscan $V <t> <x0,x1> <y0,y1>` from the window top down; the LAST strong edge in the first ~110px is the
   bottom of the tab bar + URL bar (browser) or title bar (apps). Crop below it, so URLs/IDs never show.
 - bottom: last content row above the share border / taskbar.
-- keep the face thumbnail OUT of the crop (if it overlaps the window, end the crop left of it).
+- crop the WHOLE content. Never shrink a crop to dodge something sitting on top of it (Zoom's face tile, a
+  notification): that cuts slide content. Paint it instead (step 6).
 Verify: `$F grab $V <t> edit/verify/crop.png --crop x,y,w,h` and look. One entry per app:
-`"share": {"notion": [...], "brave": [...]}` (or just `"default"`). The renderer trims each to the card aspect.
+`"share": {"notion": [...], "brave": [...]}` (or just `"default"`). Make w and h even. The layout card takes this
+crop's shape (layout_options.py); the renderer letterboxes, it never trims.
 Several apps? Add `classify.screen`: a small probe region whose colour differs per app (e.g. a title-bar patch:
 light for Notion, dark for a browser), values measured with `$F probe` at a time you know each app is up.
 
@@ -47,7 +49,11 @@ If two people look alike in colour, use a region that differs (background, shirt
 Also set `"names"` (speaker id → display name, exact spelling from intake) and `"bubble_speakers"`: the
 non-presenter ids whose lines become speech bubbles during the screen share (in camera mode everyone gets captions).
 
-## 6. Frames to skip, freeze or hide
+## 6. Paint, skip, freeze or hide
+- Overlays ON the content (Zoom's floating face tile over a shared slide, a notification): find the rectangle
+  (`colscan`/`rowscan`), probe the background colour right next to it (`$F probe`), and add
+  `"paint": [{"rect": [x, y, w, h], "color": "#rrggbb", "src_from": s, "src_to": s}]`. The colour can differ per
+  screen (a dark banner vs a white page): one entry per stretch. Check with a grab of a rendered segment.
 - Black / loading frames at share start, window-switch animations: find them (`$F probe` the crop: very dark or
   mid-transition) and add `"screen_offsets": [{"src": <segment start>, "offset": <s>, "face": true|false}]`: the
   screen picture is taken `offset` seconds later (face + audio stay in sync unless face=true).

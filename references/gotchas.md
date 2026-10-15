@@ -19,3 +19,13 @@
 12. **ffmpeg builds without drawtext/libass are common**: captions live in the overlay, not in ffmpeg.
 13. **Low memory (8 GB)**: one render worker; don't run two renders at once; ~2 min per output minute.
 14. **Never re-transcribe** a source that hasn't changed (transcribe.py caches).
+15. **Don't crop to dodge an overlay** (v1 cropped Zoom's face tile out and cut slide content): paint over it.
+16. **Don't trim to fit the card** (v1 silently cut the edges again): the card takes the content's shape; the
+    renderer letterboxes.
+17. **Odd pixel sizes crash zooms** (scale with eval=frame needs even sizes): layout_options and render_base force
+    even; render_base refuses an odd card.
+18. **Zoom targets set by eye cut text**: zooms render only after `zoom_check.py` + a look at the full-zoom still.
+19. **Unpositioned top-level elements** render in the corner: every element in the overlay layer is absolute.
+20. **Cards visible before their text is spoken** look broken: cues_lib moves a card's start to its first line.
+21. **Shared size classes leak** between stage and side cards: stage styles are scoped under `.stage`, side under `.side`.
+22. **"A box is on screen" isn't "the screen is alive"**: layout_audit counts only visible boxes with visible text.

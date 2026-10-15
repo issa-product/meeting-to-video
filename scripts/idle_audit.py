@@ -1,4 +1,6 @@
-"""No idle screen: list every stretch where nothing is animating AND the screen isn't moving.
+"""QUICK pre-check for idle stretches from the cue data alone (no browser). The real gate is layout_audit.py, which
+counts only graphics that are actually visible WITH text. List every stretch where nothing is animating AND the screen
+isn't moving.
 Covered = any graphic / bubble / card on screen, or (share mode only) real screen motion. Talk mode needs a
 graphic at all times except short breaths. Usage: python idle_audit.py <edit_dir> [--max 3]
 Exit code 1 if any stretch is longer than --max seconds (fix with graphics, zooms, callouts; then re-run).

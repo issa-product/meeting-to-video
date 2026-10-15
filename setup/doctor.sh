@@ -19,6 +19,7 @@ else bad "skill venv" "python3 -m venv $VENV && $VENV/bin/pip install numpy pill
 NV=$(node -v 2>/dev/null | tr -d v | cut -d. -f1)
 [ -n "$NV" ] && [ "$NV" -ge 22 ] && ok "node $(node -v)" || bad "node 22+ (found: ${NV:-none})" "$( [ "$OS" = Darwin ] && echo 'brew install node' || echo 'nvm install 22')"
 command -v npx >/dev/null && ok "npx (HyperFrames runs through npx; Chrome downloads on first render)" || bad "npx" "comes with node"
+[ -d ~/.config/meeting-to-video/node/node_modules/puppeteer-core ] && ok "puppeteer-core (layout audit)" || bad "puppeteer-core (layout audit)" "mkdir -p ~/.config/meeting-to-video/node && cd ~/.config/meeting-to-video/node && npm init -y && PUPPETEER_SKIP_DOWNLOAD=1 npm i puppeteer-core@23"
 KEYF=~/.config/meeting-to-video/.env
 if [ -n "$ELEVENLABS_API_KEY" ] || grep -q '^ELEVENLABS_API_KEY=..' "$KEYF" 2>/dev/null; then ok "ElevenLabs key"
 else bad "ElevenLabs API key" "user creates one at elevenlabs.io (Settings > API keys); store it as in setup/SETUP.md"; fi

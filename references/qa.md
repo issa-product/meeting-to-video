@@ -1,7 +1,13 @@
 # QA (before every preview you send, and fully before final)
 
+Before any render (with the plan):
+- [ ] style frames sent and approved (`style_frames.py`): the look is approved on stills, not discovered in a render
+- [ ] screen inventory checked by eye: every text screen has a stage, every visual screen stays in full
+
 Automatic (all must pass):
-- [ ] `idle_audit.py <edit>` exits 0 (no > 3s idle, screen share included)
+- [ ] `layout_audit.py <edit>` exits 0: no OVERLAP, OVERFLOW, EMPTY card, TEXT-ON-TEXT (graphic on busy slide
+      content), SMALL text (< 20px), IDLE > 3s (counted from real visible, non-empty graphics)
+- [ ] `cues.py` printed no MISS, CONFLICT or PROBLEMS; every zoom passed `zoom_check.py` and was looked at
 - [ ] `alpha_check.py <edit>`: every title/chapter/end card OK and overlay length == composition length
 - [ ] `build_audio.py` total == motion_plan total (frame-exact); `ffprobe` nb_frames of base == total × 30
 - [ ] cues.py printed no MISS and no "PARAPHRASE these" lines left

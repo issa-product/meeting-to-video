@@ -1,8 +1,9 @@
 # meeting-to-video (Claude Code skill)
 
-Turns a meeting / demo / screen-share recording into a short, fun, branded video: tight cut, word-synced
-captions, chapter cards, zooms, callouts, story cards, speech bubbles, sound effects and music. Claude asks
-what you want, measures your recording, shows you a plan, and only builds after you approve.
+Turns a meeting / demo / deck / screen-share recording into a short, engaging, branded video: a gentle cut that
+keeps natural speech, word-synced captions, stage scenes that replace text-only slides, side cards next to visual
+screens, chapter cards, speech bubbles, sound effects and music. Claude asks what you want, measures your
+recording, inventories every screen, and shows you a plan WITH style frames of the real look before building.
 
 ## Install (one minute)
 1. Clone it into your Claude Code skills folder:
@@ -25,8 +26,14 @@ Where the video is · how long the result should be (3 / 5 / 7 min) · who's spe
 it's for · what viewers should remember · brand colours (or it proposes) · what to deliver.
 
 ## What you approve along the way
-The plan (sections kept/cut, hook, chapters, graphic ideas) → the layout (3 options) → previews (send notes by
-timestamp) → the sound-effects cue sheet and music → the final.
+The plan (sections kept/cut, which slides become motion scenes, hook, chapters) together with 3 layout options and
+~4 style frames of the real look → previews (notes by timestamp) → the sound-effects cue sheet and music → the final.
+Every preview has passed an automatic layout audit (no overlaps, no empty boxes, nothing over slide text, no tiny
+text, no idle screen).
+
+## It learns
+At the end of each project, your taste notes and any fixes are folded back into this repo (`references/taste.md`,
+`references/gotchas.md`, the scripts), so the next video starts better.
 
 ## Time
 Rendering is roughly 2 minutes per minute of finished video on an 8 GB laptop.

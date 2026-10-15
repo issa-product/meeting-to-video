@@ -1,9 +1,10 @@
 """Base video: per-segment extract with the layout baked in, driven only by project.json (no per-video code).
 
 For every EDL range it classifies each 0.1s (using the colour signatures Claude measured): mode (share/talk),
-which screen (for multi-app shares), who is on camera. Then one ffmpeg graph per segment: crop -> rounded card
-on the brand plate, face circle + name tag (share) or speaker card + tag (talk), zooms (motion_plan.json),
-blur boxes, screen offsets, 30ms audio fades, 30fps. Inserted gap holds come from motion_plan.json.
+which screen (for multi-app shares), who is on camera. Then one ffmpeg graph per segment: paint boxes (e.g. over
+Zoom's face tile, so the slide is never cropped) -> blur boxes -> crop -> LETTERBOX into the card (never trims
+content) -> verified zooms only -> rounded card on the brand plate, face circle + name tag (share) or speaker
+card + tag (talk), screen offsets, 30ms audio fades, 30fps. All sizes even. Gap holds come from motion_plan.json.
 Lossless concat -> base_preview.mp4 / base_final.mp4.
 
 Usage: python render_base.py <edit_dir> [--preview] [--only 3,4] [--jobs 4] [--concat-only]
@@ -51,11 +52,14 @@ def runs(states, min_len=4):
     return res
 
 
-def fit(crop, aspect):
-    """Trim a crop (centred) to the card aspect so nothing is ever stretched."""
-    x, y, w, h = crop
-    if w / h > aspect: nw = int(round(h * aspect)); return [x + (w - nw) // 2, y, nw, h]
-    nh = int(round(w / aspect)); return [x, y + (h - nh) // 2, w, nh]
+def even(v): return int(v) // 2 * 2
+
+
+def letterbox(crop, cw, ch):
+    """Fit the crop INSIDE the card (no trimming, no stretching); returns even (crop, fit_w, fit_h)."""
+    x, y, w, h = crop; w, h = even(w), even(h)
+    s = min(cw / w, ch / h)
+    return [x, y, w, h], even(round(w * s)), even(round(h * s))
 
 
 def offset_for(P, a):
@@ -92,6 +96,7 @@ def enable(rs, state):
 def zoom_terms(plan, off, d):
     terms = []
     for z in plan.get("zooms", []):
+        if not z.get("verified"): continue      # zooms render only after zoom_check.py passed
         if z["t0"] < off + d and z["t1"] > off:
             T = f"(t+{off:.4f})"
             p = f"min(clip(({T}-{z['t0']:.3f})/{RAMP}\\,0\\,1)\\,clip(({z['t1']:.3f}-{T})/{RAMP}\\,0\\,1))"
@@ -102,7 +107,8 @@ def zoom_terms(plan, off, d):
 def build(ED, P, plan, seg_out, i, r, preview, out):
     src = P["video"]; a, b = r["start"], r["end"]; d = b - a
     mode, screens, who, mixed = analyze(P, src, a, b)
-    L = P["layout"][mode]; cx, cy, cw, ch = L["card"]; aspect = cw / ch
+    L = P["layout"][mode]; cx, cy, cw, ch = L["card"]
+    if cw % 2 or ch % 2: raise SystemExit(f"layout.{mode}.card {L['card']}: width and height must be even (zooms need it)")
     lay = ED / "layout"; tags = json.loads((lay / "layout.json").read_text())["tags"]
     o = offset_for(P, a); so = o["offset"] if o else 0.0
     share_end = P.get("share_end")
@@ -119,31 +125,43 @@ def build(ED, P, plan, seg_out, i, r, preview, out):
         f.append("[fsx]null[fs];[fs0]nullsink" if o.get("face") else "[fsx]nullsink;[fs0]null[fs]")
     else:
         f.append("[s0]null[s];[fs0]null[fs]")
+    # paint boxes: flat colour over things that sit ON the content (Zoom's face tile, notifications), source px
+    paints = [pb for pb in P.get("paint", []) if pb.get("src_from", 0) < b and pb.get("src_to", 1e9) > a]
+    if paints:
+        boxes = []
+        for pb in paints:
+            x, y, w, h = pb["rect"]; la, lb = max(0, pb.get("src_from", 0) - a), min(d, pb.get("src_to", 1e9) - a)
+            boxes.append(f"drawbox=x={x}:y={y}:w={w}:h={h}:color=0x{pb['color'].lstrip('#')}@1:t=fill:enable='between(t\\,{la:.2f}\\,{lb:.2f})'")
+        f.append(f"[s]{','.join(boxes)}[sp]")
+    else:
+        f.append("[s]null[sp]")
     # blur boxes (source px, active when this segment overlaps their source range)
     blurs = [bx for bx in P.get("blur", []) if bx["src_from"] < b and bx["src_to"] > a]
     if blurs:
-        f.append(f"[s]split={len(blurs) + 1}" + "".join(f"[bl{j}]" for j in range(len(blurs) + 1)))
+        f.append(f"[sp]split={len(blurs) + 1}" + "".join(f"[bl{j}]" for j in range(len(blurs) + 1)))
         last = "bl0"
         for j, bx in enumerate(blurs, 1):
             x, y, w, h = bx["rect"]
             f.append(f"[bl{j}]crop={w}:{h}:{x}:{y},boxblur=10:2[bb{j}];[{last}][bb{j}]overlay={x}:{y}[bo{j}]"); last = f"bo{j}"
         f.append(f"[{last}]null[sb]")
     else:
-        f.append("[s]null[sb]")
+        f.append("[sp]null[sb]")
     # screen crop(s) -> card (with zoom)
     crops = P["crops"]["share"] if mode == "share" else {"default": P["crops"]["talk"]}
     names = sorted({s for s, _, _ in screens})
     zt = zoom_terms(plan, seg_out, d) if (mode == "share" and seg_out is not None) else []
+    pad_rgb = P.get("letterbox", "#FFFFFF").lstrip("#")
     f.append(f"[sb]split={len(names)}" + "".join(f"[a_{n}]" for n in names))
     for n in names:
-        X, Y, CW, CH = fit(crops.get(n, crops.get("default")), aspect)
+        (X, Y, CW, CH), FW, FH = letterbox(crops.get(n, crops.get("default")), cw, ch)
+        fitc = f"crop={CW}:{CH}:{X}:{Y},scale={FW}:{FH}:flags=lanczos,pad={cw}:{ch}:{(cw - FW) // 2}:{(ch - FH) // 2}:color=0x{pad_rgb}"
         if zt:
             zs = "+".join(e for _, e in zt)
             px = "+".join(f"{cw}*{z['fx']}*({e})" for z, e in zt); py = "+".join(f"{ch}*{z['fy']}*({e})" for z, e in zt)
-            f.append(f"[a_{n}]crop={CW}:{CH}:{X}:{Y},scale=w='2*trunc({cw}*(1+{zs})/2)':h='2*trunc({ch}*(1+{zs})/2)':eval=frame:flags=lanczos,"
+            f.append(f"[a_{n}]{fitc},scale=w='2*trunc({cw}*(1+{zs})/2)':h='2*trunc({ch}*(1+{zs})/2)':eval=frame:flags=lanczos,"
                      f"crop={cw}:{ch}:'{px}':'{py}',format=rgba[c_{n}]")
         else:
-            f.append(f"[a_{n}]crop={CW}:{CH}:{X}:{Y},scale={cw}:{ch}:flags=lanczos,format=rgba[c_{n}]")
+            f.append(f"[a_{n}]{fitc},format=rgba[c_{n}]")
     f.append(f"[2:v]format=gray,split={len(names)}" + "".join(f"[m_{n}]" for n in names))
     last = "1:v"
     for j, n in enumerate(names):

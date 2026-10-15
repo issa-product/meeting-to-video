@@ -1,4 +1,5 @@
-"""Three layout options as still frames, so the user can pick (cards sized to the measured screen aspect).
+"""Three layout options as still frames, so the user can pick. The card takes the SCREEN's own shape (measured crop
+aspect) and even pixel sizes, so the renderer never has to trim or letterbox much.
   A: face column on the right (largest face)   B: face in the lower-right corner   C: small face top-right (largest screen)
 Usage: python layout_options.py <edit_dir> <share_src_second> [--talk <talk_src_second>]
 Writes <edit_dir>/verify/layout_A|B|C.png and layout_options.json (paste the chosen "share"/"talk" into project.json).
@@ -53,6 +54,7 @@ opts = {}
 for key, h, xy, fd, fpos in (("A", 850, (48, 56), 260, "col"), ("B", 880, (40, 40), 210, "corner"), ("C", 930, (40, 40), 160, "top")):
     w = int(round(h * asp))
     if xy[0] + w > 1920 - (fd + 90 if fpos == "col" else 40): w = 1920 - xy[0] - (fd + 90 if fpos == "col" else 40); h = int(round(w / asp))
+    w, h = w // 2 * 2, h // 2 * 2             # even sizes (zooms and yuv420 need them); card = the content's own shape
     cb = [xy[0], xy[1], w, h]
     if fpos == "col": f = [xy[0] + w + (1920 - xy[0] - w - fd) // 2, 92, fd]
     elif fpos == "corner": f = [1920 - fd - 60, 1080 - fd - 90, fd]
@@ -61,7 +63,7 @@ for key, h, xy, fd, fpos in (("A", 850, (48, 56), 260, "col"), ("B", 880, (40, 4
     opts[key] = {"share": {"card": cb, "face": f}}
 if a.talk is not None:
     tx, ty, tw, th = P["crops"]["talk"]; tf = frame(a.talk).crop((tx, ty, tx + tw, ty + th))
-    h = 850; w = int(round(h * tw / th)); im = bg(); card(im, tf, [48, 56, w, h]); im.save(ED / "verify/layout_talk.png")
+    h = 850; w = int(round(h * tw / th)) // 2 * 2; im = bg(); card(im, tf, [48, 56, w, h]); im.save(ED / "verify/layout_talk.png")
     for k in opts: opts[k]["talk"] = {"card": [48, 56, w, h]}
 (ED / "layout_options.json").write_text(json.dumps(opts, indent=1))
 print("wrote verify/layout_A.png, layout_B.png, layout_C.png" + (", layout_talk.png" if a.talk is not None else "") + " + layout_options.json")
