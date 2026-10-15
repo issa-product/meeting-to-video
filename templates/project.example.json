@@ -1,0 +1,31 @@
+{
+  "_comment": "Everything here is MEASURED by Claude for THIS recording (see references/measuring.md). Source pixels, source seconds.",
+  "video": "/absolute/path/to/recording.mp4",
+  "target_minutes": 5,
+  "names": { "speaker_0": "Alex Rivera", "speaker_1": "Sam" },
+  "bubble_speakers": ["speaker_1"],
+  "brand": {
+    "primary": "#0F6E78", "primary_dark": "#0A4A52", "accent": "#F5B320", "pop": "#F26A4F",
+    "purple": "#6B4FA0", "ink": "#14213D", "paper": "#FFFBF3", "font": "Nunito"
+  },
+  "layout": {
+    "share": { "card": [48, 56, 1404, 850], "face": [1556, 92, 260] },
+    "talk":  { "card": [48, 56, 1060, 850] }
+  },
+  "classify": {
+    "mode":   { "probe": [212, 400, 4, 400], "share_rgb": [68, 200, 5], "tol": 60 },
+    "screen": { "probe": [280, 135, 40, 20], "values": { "default": [240, 240, 240] } },
+    "who": {
+      "share": { "probe": [1714, 84, 144, 144], "values": { "speaker_0": [161, 124, 98], "speaker_1": [131, 112, 104] } },
+      "talk":  { "probe": [362, 60, 1216, 976], "values": { "speaker_0": [170, 130, 104], "speaker_1": [120, 118, 110] } }
+    }
+  },
+  "crops": {
+    "share": { "default": [216, 124, 1434, 868] },
+    "face": [1714, 84, 144, 144],
+    "talk": [362, 60, 1216, 976]
+  },
+  "screen_offsets": [ { "src": 1261.3, "offset": 2.3, "face": true, "why": "share starts on black frames" } ],
+  "share_end": null,
+  "blur": [ { "src_from": 630, "src_to": 875, "rect": [452, 263, 130, 34], "why": "student name" } ]
+}

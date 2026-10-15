@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Overlay</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="data.js"></script>
+    <style>
+      @font-face { font-family: "Nunito"; font-weight: 200 1000; font-display: block; src: url("assets/fonts/Nunito.ttf") format("truetype"); }
+      :root { --P: #0F6E78; --PD: #0A4A52; --A: #F5B320; --POP: #F26A4F; --POPD: #B8432C; --PU: #6B4FA0; --INK: #14213D; --PAPER: #FFFBF3; --MUTE: #5B6475; --F: "Nunito"; }
+      html, body { margin: 0; background: transparent; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: transparent; font-family: var(--F), sans-serif; color: var(--PAPER); }
+      svg.ic { width: 1em; height: 1em; flex: none; }
+      .cap { position: absolute; top: 938px; text-align: center; font-weight: 800; font-size: 44px; line-height: 1.15; text-shadow: 0 2px 12px rgba(0,20,24,.45); white-space: nowrap; }
+      .cap .w { opacity: .42; } .cap .w.k { color: var(--A); } .cap.alt .w { color: #CFF3EF; } .cap.alt .w.k { color: var(--A); }
+      .chip-ch { position: absolute; text-align: center; }
+      .chip-ch .n { font: 800 16px var(--F); letter-spacing: 2px; text-transform: uppercase; color: var(--A); }
+      .chip-ch .t { font: 800 22px var(--F); margin-top: 2px; opacity: .92; }
+      .bub { position: absolute; box-sizing: border-box; background: var(--PAPER); color: var(--INK); border-radius: 26px; padding: 18px 22px 20px;
+             box-shadow: 0 14px 34px rgba(0,25,30,.35); transform-origin: 60% 0%; }
+      .bub .lbl { display: flex; align-items: center; gap: 8px; font: 800 18px var(--F); letter-spacing: 1.2px; text-transform: uppercase; color: var(--P); margin-bottom: 6px; }
+      .bub .txt { font: 700 24px/1.28 var(--F); }
+      .full { position: absolute; inset: 0; overflow: hidden; z-index: 10; background: radial-gradient(1200px 800px at 18% 12%, color-mix(in srgb, var(--P) 75%, white) 0%, var(--P) 38%, var(--PD) 100%); }
+      .full .blob { position: absolute; border-radius: 50%; }
+      .full .b1 { width: 760px; height: 760px; right: -180px; bottom: -260px; background: var(--A); opacity: .92; }
+      .full .b2 { width: 300px; height: 300px; right: 470px; top: -110px; background: var(--POP); opacity: .9; }
+      .full .b3 { width: 120px; height: 120px; left: 160px; bottom: 120px; border: 18px solid var(--PAPER); opacity: .25; box-sizing: border-box; }
+      .full .inner { position: absolute; left: 160px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; }
+      .full .kick { font: 800 30px var(--F); letter-spacing: 4px; text-transform: uppercase; color: var(--A); }
+      .full .big { font: 900 124px/1.0 var(--F); letter-spacing: -3px; margin-top: 18px; max-width: 1300px; }
+      .full .sub { font: 700 38px var(--F); opacity: .82; margin-top: 26px; }
+      .full .num { font: 900 46px var(--F); color: var(--INK); background: var(--A); width: 96px; height: 96px; border-radius: 28px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+      .full .pill { display: inline-flex; align-items: center; gap: 18px; margin-top: 40px; background: var(--PAPER); color: var(--P); font: 900 46px var(--F); padding: 22px 36px; border-radius: 999px; width: max-content; }
+      .lane { position: absolute; left: 76px; top: 84px; display: flex; align-items: center; gap: 12px; background: var(--INK); font: 800 28px var(--F); padding: 14px 24px 14px 18px; border-radius: 999px; box-shadow: 0 10px 26px rgba(0,0,0,.28); }
+      .lane .dot { width: 34px; height: 34px; border-radius: 50%; background: var(--A); color: var(--INK); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+      .scrim { position: absolute; border-radius: 22px; background: rgba(6,40,46,.64); }
+      .rowhi { position: absolute; box-sizing: border-box; border-left: 8px solid var(--A); background: rgba(245,179,32,.22); box-shadow: 0 0 0 2px rgba(245,179,32,.55) inset; }
+      .pc { position: absolute; background: var(--PAPER); color: var(--INK); border-radius: 32px; box-shadow: 0 24px 60px rgba(0,20,25,.42); box-sizing: border-box; padding: 40px 48px; }
+      .pc.at-col { padding: 26px 28px; border-radius: 26px; }
+      .ey { font: 800 20px var(--F); letter-spacing: 2.5px; text-transform: uppercase; color: var(--POPD); margin-bottom: 8px; }
+      .pc h3 { margin: 0 0 18px; font: 900 46px/1.08 var(--F); letter-spacing: -.5px; } .at-col h3 { font-size: 32px; margin-bottom: 12px; }
+      .row { display: flex; align-items: center; gap: 16px; font: 800 34px/1.2 var(--F); margin: 14px 0; } .at-col .row { font-size: 24px; gap: 12px; margin: 10px 0; }
+      .ib { width: 58px; height: 58px; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--PAPER); background: var(--P); flex: none; }
+      .at-col .ib { width: 42px; height: 42px; border-radius: 13px; font-size: 22px; }
+      .ib.pop { background: var(--POP); } .ib.acc { background: var(--A); color: var(--INK); } .ib.pu { background: var(--PU); }
+      .hl { background: linear-gradient(transparent 58%, color-mix(in srgb, var(--A) 55%, transparent) 58%); padding: 0 4px; }
+      .projhead { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; } .projhead .ib { width: 52px; height: 52px; font-size: 28px; } .projhead .t { font: 900 30px/1.1 var(--F); }
+      .stamp { position: absolute; font: 900 60px var(--F); text-transform: uppercase; padding: 14px 34px; border: 8px solid currentColor; border-radius: 22px; background: rgba(255,251,243,.95); white-space: nowrap; box-shadow: 0 18px 44px rgba(0,0,0,.3); }
+      .burst { position: absolute; font: 1000 300px/1 var(--F); color: var(--A); letter-spacing: -10px; text-shadow: 0 16px 0 var(--PD), 0 30px 60px rgba(0,0,0,.35); }
+      .mx { position: relative; width: 640px; height: 470px; margin: 6px 0 0 54px; }
+      .mx .q { position: absolute; width: 50%; height: 50%; box-sizing: border-box; border: 2px solid #E3DCCD; } .mx .q.tr { right: 0; top: 0; background: rgba(242,106,79,.12); }
+      .mx .ax { position: absolute; font: 800 22px var(--F); color: var(--MUTE); letter-spacing: 1.5px; text-transform: uppercase; }
+      .mx .dot { position: absolute; display: flex; align-items: center; gap: 10px; font: 900 26px var(--F); white-space: nowrap; }
+      .mx .dot i { width: 26px; height: 26px; border-radius: 50%; display: block; flex: none; }
+      .flow { display: flex; gap: 40px; align-items: flex-start; } .steps { width: 470px; }
+      .stp { background: #F1EBDD; border-radius: 16px; padding: 12px 18px; font: 800 28px var(--F); display: flex; gap: 14px; align-items: center; }
+      .stp b { width: 34px; height: 34px; border-radius: 10px; background: var(--POP); color: var(--PAPER); display: flex; align-items: center; justify-content: center; font: 900 20px var(--F); flex: none; }
+      .arr { height: 18px; width: 4px; background: #D9CFBC; margin: 3px 0 3px 34px; }
+      .cs { display: flex; flex-direction: column; gap: 16px; padding-top: 24px; }
+      .csb { background: var(--POP); color: var(--PAPER); font: 900 28px var(--F); padding: 14px 22px; border-radius: 22px 22px 22px 6px; white-space: nowrap; }
+      .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; } .cmp .side { border-radius: 22px; padding: 22px 26px; }
+      .cmp .old { background: #FBE6E0; } .cmp .new { background: #DDF1EE; } .cmp .hd { font: 900 30px var(--F); margin-bottom: 10px; }
+      .cmp .it { font: 800 28px var(--F); margin: 8px 0; display: flex; gap: 12px; align-items: center; }
+      .bars .br { margin: 20px 0; } .bars .lab { font: 900 32px var(--F); display: flex; justify-content: space-between; }
+      .bars .trk { height: 38px; border-radius: 999px; background: #E9E3D6; overflow: hidden; margin-top: 8px; } .bars .fill { height: 100%; border-radius: 999px; transform-origin: 0 50%; }
+      .trk2 { position: relative; padding-left: 50px; } .trk2 .line { position: absolute; left: 17px; top: 18px; bottom: 18px; width: 6px; background: #E3DCCD; border-radius: 3px; }
+      .trk2 .linef { position: absolute; left: 17px; top: 18px; width: 6px; background: var(--P); border-radius: 3px; transform-origin: 50% 0; }
+      .trk2 .s { position: relative; font: 800 32px var(--F); margin: 0 0 30px; } .trk2 .s:last-child { margin-bottom: 0; }
+      .trk2 .s i { position: absolute; left: -46px; top: 6px; width: 30px; height: 30px; border-radius: 50%; background: var(--P); box-shadow: 0 0 0 6px var(--PAPER); } .trk2 .s:last-child i { background: var(--A); }
+      .bigl { font: 900 54px/1.12 var(--F); margin: 10px 0; }
+      .quote { font: 900 48px/1.2 var(--F); letter-spacing: -.5px; } .quote::before { content: "\201C"; display: block; font: 900 120px/0.6 var(--F); color: var(--A); margin-bottom: 14px; }
+      .qwho { margin-top: 18px; font: 800 24px var(--F); color: var(--MUTE); }
+      .score { display: flex; gap: 24px; margin-top: 10px; } .score .p { flex: 1; border-radius: 24px; padding: 20px; text-align: center; background: #F1EBDD; }
+      .score .nm { font: 800 26px var(--F); color: var(--MUTE); } .score .v { font: 1000 92px/1.05 var(--F); color: var(--P); } .score .p:last-child .v { color: var(--POP); }
+      .kin .l { position: relative; display: block; width: max-content; margin: 6px 0; }
+      .kin .big { font: 900 72px/1.05 var(--F); } .kin .mid { font: 800 40px var(--F); opacity: .9; }
+      .kin .pill { display: inline-flex; align-items: center; gap: 18px; background: var(--A); color: var(--INK); font: 900 56px var(--F); padding: 16px 30px; border-radius: 22px; margin-top: 26px; }
+      .kin .strike { position: absolute; left: -6px; right: -6px; top: 52%; height: 10px; background: var(--POP); border-radius: 5px; transform-origin: 0 50%; }
+      .kin.free { text-align: center; color: var(--PAPER); } .kin.free .l { margin: 6px auto; } .kin.free .big { font-size: 92px; text-shadow: 0 6px 24px rgba(0,0,0,.35); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="60" data-width="1920" data-height="1080" data-fps="30"><div id="layer"></div></div>
+    <script>
+      /* ======================================================================================
+         Overlay component library. Driven entirely by data.js (written by cues_lib.py).
+         SEEK-SAFETY RULES (the renderer steps frames in its own order; a snapshot is NOT proof):
+           - visibility is always a tween with BOTH ends declared (fromTo autoAlpha 0->1, to autoAlpha 0)
+           - never put autoAlpha only in a fromTo's FROM vars, never rely on tl.set for card visibility
+           - every fromTo placed after t=0 passes immediateRender:false
+           - GSAP owns transform: centre with xPercent/yPercent, never a CSS translate
+         ====================================================================================== */
+      const D = window.DATA, root = document.documentElement, BR = D.brand || {};
+      [["--P", "primary"], ["--PD", "primary_dark"], ["--A", "accent"], ["--POP", "pop"], ["--PU", "purple"], ["--INK", "ink"], ["--PAPER", "paper"]]
+        .forEach(([v, k]) => BR[k] && root.style.setProperty(v, BR[k]));
+      if (BR.font) root.style.setProperty("--F", '"' + BR.font + '"');
+      const layer = document.getElementById("layer");
+      const LAY = D.layout, SH = LAY.share, TK = LAY.talk;
+      const first = (spk) => ((D.names || {})[spk] || "").split(" ")[0];
+      const ICONS = {
+        msg: '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+        layers: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>',
+        receipt: '<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
+        zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+        tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+        users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>',
+        x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', check: '<path d="M20 6 9 17l-5-5"/>',
+        trend: '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+        pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+        swap: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+        sparkles: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>',
+        flag: '<path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/>',
+        scissors: '<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+        clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+        play: '<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>',
+      };
+      const TONE = { x: "pop", trend: "pu", pin: "acc", swap: "pu", zap: "acc", sparkles: "pop", flag: "acc", tag: "pop", clock: "acc" };
+      const ic = (n) => '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[n] || ICONS.check) + "</svg>";
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      const ey = (g) => (g.ey ? '<div class="ey">' + esc(g.ey) + "</div>" : "");   // eyebrows are opt-in (taste: no decorative labels)
+      const css = (n, o) => Object.assign(n.style, o);
+      const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); const n = t.content.firstChild; layer.appendChild(n); return n; };
+      const centre = (n, x, y, rot) => { css(n, { left: x + "px", top: y + "px" }); gsap.set(n, { xPercent: -50, yPercent: -50, rotation: rot || 0 }); };
+      const modeAt = (t) => (D.modes.find((m) => t >= m.t0 - 0.01 && t < m.t1) || D.modes[D.modes.length - 1]).mode;
+      const cardOf = (md) => (md === "talk" && TK ? TK.card : SH.card);
+      // column (share mode): the strip right of the screen card, under the face; panel (talk mode): right of the speaker card
+      const colBox = () => { const c = SH.card, x = c[0] + c[2] + 18; return { x, y: SH.face ? SH.face[1] + SH.face[2] + 160 : c[1] + 90, w: 1920 - x - 18 }; };   // name tag, then chapter chip, then content
+      const panelBox = () => { const c = (TK || SH).card, x = c[0] + c[2] + 42; return { x, y: c[1], w: 1920 - x - 48, h: c[3] }; };
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.set({}, {}, D.total);
+      const IN = "expo.out", OUT = "power2.in", COVER = 0.34;
+
+      function show(n, t0, t1, o) {
+        o = o || {}; gsap.set(n, { autoAlpha: 0 });
+        tl.fromTo(n, { autoAlpha: 0, y: o.y ?? 14, scale: o.s ?? 1 }, { autoAlpha: 1, y: 0, scale: 1, duration: o.d ?? 0.42, ease: o.ease ?? IN, immediateRender: false }, t0);
+        tl.to(n, { autoAlpha: 0, y: -8, duration: 0.26, ease: OUT }, Math.max(t0 + 0.45, t1 - 0.26));
+      }
+      function reveal(n, t, o) {
+        o = o || {}; gsap.set(n, { autoAlpha: 0 });
+        tl.fromTo(n, { autoAlpha: 0, x: o.x ?? 0, y: o.y ?? 12, scale: o.s ?? 1 }, { autoAlpha: 1, x: 0, y: 0, scale: 1, duration: o.d ?? 0.4, ease: o.ease ?? IN, immediateRender: false }, t);
+      }
+      function scrim(t0, t1) {
+        const c = cardOf(modeAt(t0 + 0.5)); const s = el('<div class="scrim"></div>');
+        css(s, { left: c[0] + "px", top: c[1] + "px", width: c[2] + "px", height: c[3] + "px" });
+        show(s, Math.max(0, t0 - 0.05), t1, { y: 0, d: 0.3 });
+      }
+      function card(g, inner, style) {
+        if (g.pos === "card") scrim(g.t0, g.t1);   // scrim FIRST so it sits under the card
+        const n = el('<div class="pc' + (g.pos === "col" ? " at-col" : "") + '">' + inner + "</div>");
+        if (style) n.setAttribute("style", style);
+        if (g.pos === "card") { const c = cardOf(modeAt(g.t0 + 0.5)); centre(n, c[0] + c[2] / 2, c[1] + c[3] / 2); }
+        else if (g.pos === "panel") { const p = panelBox(); css(n, { width: p.w + "px" }); centre(n, p.x + p.w / 2, p.y + p.h / 2); }
+        else { const b = colBox(); css(n, { left: b.x + "px", top: b.y + "px", width: b.w + "px" }); }
+        show(n, g.t0, g.t1, { s: 0.94, y: 18 });
+        return n;
+      }
+      const rowHtml = (r, i) => '<div class="row r' + i + '"><span class="ib ' + (TONE[r.icon] || "") + '">' + ic(r.icon) + "</span>" + esc(r.text) + "</div>";
+
+      /* ---------- captions (main speakers) ---------- */
+      const presenter = Object.keys(D.names || {})[0];
+      D.captions.forEach((c) => {
+        const n = el('<div class="cap' + (c.who !== presenter ? " alt" : "") + '">' + c.w.map((w) => '<span class="w' + (w.k ? " k" : "") + '">' + esc(w.x) + "</span>").join(" ") + "</div>");
+        const cc = cardOf(c.mode); css(n, { left: cc[0] + "px", width: cc[2] + "px" });
+        gsap.set(n, { autoAlpha: 0 });
+        tl.fromTo(n, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out", immediateRender: false }, c.t0);
+        const sp = n.querySelectorAll(".w");
+        c.w.forEach((w, k) => tl.fromTo(sp[k], { opacity: 0.42 }, { opacity: 1, duration: 0.05, ease: "none", immediateRender: false }, w.t));
+        tl.to(n, { autoAlpha: 0, duration: 0.1, ease: "none" }, Math.max(c.t0 + 0.17, c.t1 - 0.1));
+      });
+      /* ---------- side-speaker bubbles (share mode) ---------- */
+      D.bubbles.forEach((b) => {
+        const n = el('<div class="bub"><div class="lbl">' + ic("msg") + esc(first(b.who)) + (b.kind === "q" ? " asks" : "") + '</div><div class="txt">' + esc(b.text) + "</div></div>");
+        const box = colBox(); css(n, { left: box.x + "px", top: box.y + "px", width: box.w + "px" });
+        show(n, b.t0, b.t1, { s: 0.86, y: 10, ease: "back.out(1.7)", d: 0.38 });
+      });
+      /* ---------- chapter chips ---------- */
+      D.chips.forEach((c) => D.modes.forEach((m) => {
+        const a = Math.max(c.t0 + 0.2, m.t0), b = Math.min(c.t1 - COVER, m.t1);
+        if (b - a < 0.6) return;
+        const n = el('<div class="chip-ch"><div class="n">Chapter ' + c.n + " of " + D.nch + '</div><div class="t">' + esc(c.title) + "</div></div>");
+        if (m.mode === "share") { const bx = colBox(); css(n, { left: bx.x + "px", width: bx.w + "px", top: bx.y - 74 + "px" }); }
+        else { const p = panelBox(); css(n, { left: p.x + "px", width: p.w + "px", top: "70px" }); }
+        show(n, a, b, { y: 6 });
+      }));
+      /* ---------- title / chapter / end cards (full frame, slide over the inserted gaps) ---------- */
+      function fullCard(html, t0, tEnd, slide) {
+        const n = el('<div class="full"><div class="blob b1" data-layout-allow-overflow></div><div class="blob b2" data-layout-allow-overflow></div><div class="blob b3"></div><div class="inner">' + html + "</div></div>");
+        gsap.set(n, { autoAlpha: 0 });
+        tl.fromTo(n, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.04, ease: "none", immediateRender: false }, t0);
+        tl.fromTo(n, { xPercent: -100 }, { xPercent: 0, duration: slide, ease: "power3.out", immediateRender: false }, t0);
+        tl.fromTo(n.querySelector(".b1"), { scale: 0.65, rotate: -20 }, { scale: 1, rotate: 0, duration: 0.85, ease: "back.out(1.4)", immediateRender: false }, t0 + 0.05);
+        if (tEnd != null) { tl.to(n, { xPercent: 100, duration: COVER, ease: "power3.in" }, tEnd); tl.to(n, { autoAlpha: 0, duration: 0.04, ease: "none" }, tEnd + COVER - 0.04); }
+        return n;
+      }
+      {
+        const T = D.title, t0 = T.start - COVER;
+        const n = fullCard('<div class="kick">' + esc(T.kicker || "Walkthrough") + '</div><div class="big">' + (T.big || "") + '</div><div class="sub">' + esc(T.sub || "") + "</div>", t0, null, COVER);
+        [".kick", ".big", ".sub"].forEach((s, k) => reveal(n.querySelector(s), t0 + 0.2 + k * 0.12, { y: 24 }));
+        tl.to(n, { autoAlpha: 0, duration: 0.04, ease: "none" }, T.start + T.dur + COVER - 0.04);
+      }
+      D.chapters.forEach((c) => {
+        const t0 = c.n === 1 ? c.start : c.start - COVER;
+        const n = fullCard('<div class="num">' + String(c.n).padStart(2, "0") + '</div><div class="kick">' + esc(c.kicker) + '</div><div class="big">' + esc(c.title) + "</div>", t0, c.start + c.dur, COVER);
+        reveal(n.querySelector(".num"), t0 + 0.14, { s: 0.6, y: 0, ease: "back.out(2)" }); reveal(n.querySelector(".kick"), t0 + 0.22, { y: 18 }); reveal(n.querySelector(".big"), t0 + 0.3, { y: 26 });
+      });
+      {
+        const E = D.end, t0 = E.start - COVER;
+        const n = fullCard('<div class="kick">' + esc(E.kicker || "That's the tour") + '</div><div class="big">' + esc(E.big || "Questions?") + '</div><div class="pill">' + ic("msg") + esc(E.cta || "") + '</div><div class="sub" style="margin-top:44px">' + esc(E.sub || "") + "</div>", t0, null, COVER + 0.1);
+        reveal(n.querySelector(".kick"), t0 + 0.3, { y: 18 }); reveal(n.querySelector(".big"), t0 + 0.42, { y: 26 });
+        reveal(n.querySelector(".pill"), t0 + 0.9, { s: 0.8, y: 0, ease: "back.out(1.8)" }); reveal(n.querySelector(".sub"), t0 + 1.6, { y: 14 });
+      }
+
+      /* ---------- graphics: one renderer per type (see references/motion-graphics.md) ---------- */
+      const R = {
+        kinetic(g) {   // lines that land on their word: {lines:[{t, text, style:"big|mid|pill", strike_t?, icon?}]}; pos "free" = big text over the card with a scrim
+          const free = g.pos === "free";
+          g = Object.assign({}, g, { t0: Math.max(g.t0, g.lines[0].t - 0.2) });   // never an empty card: arrive with the first line
+          const html = '<div class="kin' + (free ? " free" : "") + '">' + g.lines.map((l, i) => '<div class="l l' + i + " " + (l.style || "big") + '">' + (l.icon ? ic(l.icon) : "") + esc(l.text) + (l.strike_t ? '<span class="strike"></span>' : "") + "</div>").join("") + "</div>";
+          let n;
+          if (free) { const c = cardOf(modeAt(g.t0 + 0.5)); scrim(g.t0, g.t1); n = el(html); centre(n, c[0] + c[2] / 2, c[1] + c[3] / 2); show(n, g.t0, g.t1, { y: 0, d: 0.2 }); }
+          else n = card(g, html);
+          g.lines.forEach((l, i) => {
+            const ln = n.querySelector(".l" + i);
+            reveal(ln, l.t - 0.08, l.style === "pill" ? { s: 0.7, y: 0, ease: "back.out(2)" } : { y: 22 });
+            if (l.strike_t) { const s = ln.querySelector(".strike"); gsap.set(s, { scaleX: 0 }); tl.fromTo(s, { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out", immediateRender: false }, l.strike_t); }
+          });
+        },
+        proj(g) {
+          const n = card(g, '<div class="projhead"><span class="ib ' + (TONE[g.icon] || "") + '">' + ic(g.icon) + '</span><div class="t">' + esc(g.title) + "</div></div>" +
+            g.rows.map((r, i) => '<div class="row r' + i + '" style="font-size:24px;margin:8px 0">' + esc(r.text) + "</div>").join(""));
+          g.rows.forEach((r, i) => i > 0 && reveal(n.querySelector(".r" + i), r.t - 0.05, { x: -16, y: 0 }));
+        },
+        rowhi(g) {   // highlight bars on the screen card; ys = screen y (px) while the zoom is fully in
+          const c = SH.card;
+          g.ys.forEach((y) => {
+            const n = el('<div class="rowhi"></div>'); css(n, { left: c[0] + "px", width: c[2] + "px", top: y - g.h / 2 + "px", height: g.h + "px" });
+            gsap.set(n, { autoAlpha: 0, scaleX: 0, transformOrigin: "0 50%" });
+            tl.fromTo(n, { autoAlpha: 0, scaleX: 0 }, { autoAlpha: 1, scaleX: 1, duration: 0.45, ease: "power3.out", immediateRender: false }, g.t0);
+            tl.to(n, { autoAlpha: 0, duration: 0.22, ease: OUT }, Math.max(g.t0 + 0.5, g.t1 - 0.22));
+          });
+        },
+        list(g) {
+          const n = card(g, ey(g) + (g.title ? "<h3>" + esc(g.title) + "</h3>" : "") + g.rows.map(rowHtml).join(""), g.pos === "card" ? "min-width:760px" : "");
+          g.rows.forEach((r, i) => reveal(n.querySelector(".r" + i), r.t - 0.08, { x: -20, y: 0 }));
+        },
+        matrix(g) {   // {x_label, y_label, dots:[{t,label,x,y,tone}], hot_t}
+          const tone = (t) => (t === "pop" ? "POP" : t === "acc" ? "A" : "P");
+          const n = card(g, ey(g) + (g.title ? "<h3>" + esc(g.title) + "</h3>" : "") + '<div class="mx">' +
+            '<div class="q" style="left:0;top:0"></div><div class="q tr"></div><div class="q" style="left:0;bottom:0"></div><div class="q" style="right:0;bottom:0"></div>' +
+            '<div class="ax" style="left:-54px;top:200px;transform:rotate(-90deg)">' + esc(g.y_label || "Impact") + '</div><div class="ax" style="right:0;bottom:-34px">' + esc(g.x_label || "Urgency") + " →</div>" +
+            g.dots.map((d, i) => '<div class="dot d' + i + '" style="left:' + d.x * 640 + "px;top:" + d.y * 470 + 'px"><i style="background:var(--' + tone(d.tone) + ')"></i>' + esc(d.label) + "</div>").join("") + "</div>", "padding-bottom:64px");
+          g.dots.forEach((d, i) => { const dn = n.querySelector(".d" + i); gsap.set(dn, { xPercent: -14, yPercent: -50 }); reveal(dn, d.t - 0.1, { s: 0.4, y: 0, ease: "back.out(2.4)" }); });
+          if (g.hot_t) tl.fromTo(n.querySelector(".q.tr"), { backgroundColor: "rgba(242,106,79,0.12)" }, { backgroundColor: "rgba(242,106,79,0.32)", duration: 0.4, immediateRender: false }, g.hot_t);
+        },
+        quote(g) { const n = card(g, '<div class="quote">' + esc(g.text) + '</div><div class="qwho">' + esc(g.who || "") + "</div>", g.pos === "card" ? "max-width:980px" : ""); reveal(n.querySelector(".qwho"), g.t + 0.6, { y: 8 }); },
+        flow(g) {    // {title, steps:[{t,text}], bubbles:[{t,text}]}
+          const n = card(g, ey(g) + "<h3>" + esc(g.title) + '</h3><div class="flow"><div class="steps">' +
+            g.steps.map((s, i) => (i ? '<div class="arr a' + i + '"></div>' : "") + '<div class="stp s' + i + '"><b>' + (i + 1) + "</b>" + esc(s.text) + "</div>").join("") +
+            '</div><div class="cs">' + (g.bubbles || []).map((b, i) => '<div class="csb c' + i + '">' + esc(b.text) + "</div>").join("") + "</div></div>");
+          g.steps.forEach((s, i) => { reveal(n.querySelector(".s" + i), s.t - 0.1, { x: -18, y: 0 }); if (i) reveal(n.querySelector(".a" + i), s.t - 0.15, { y: -6 }); });
+          (g.bubbles || []).forEach((b, i) => reveal(n.querySelector(".c" + i), b.t - 0.05, { s: 0.6, y: 0, ease: "back.out(2.2)" }));
+        },
+        compare(g) {  // {title, old:{t,label,rows[]}, new:{t,label,rows[]}}
+          const n = card(g, ey(g) + "<h3>" + esc(g.title || "Before vs after") + '</h3><div class="cmp">' +
+            '<div class="side old"><div class="hd" style="color:var(--POPD)">' + esc(g.old.label || "Before") + "</div>" + g.old.rows.map((r) => '<div class="it">' + ic("x") + esc(r) + "</div>").join("") + "</div>" +
+            '<div class="side new"><div class="hd" style="color:var(--P)">' + esc(g.new.label || "After") + "</div>" + g.new.rows.map((r) => '<div class="it">' + ic("check") + esc(r) + "</div>").join("") + "</div></div>", "min-width:880px");
+          reveal(n.querySelector(".old"), g.old.t - 0.1, { x: -20, y: 0 }); reveal(n.querySelector(".new"), g.new.t - 0.1, { x: 20, y: 0 });
+        },
+        bar(g) {      // {title, items:[{t,label,pct}]}
+          const n = card(g, ey(g) + "<h3>" + esc(g.title) + '</h3><div class="bars">' + g.items.map((x, i) => '<div class="br b' + i + '"><div class="lab"><span>' + esc(x.label) + "</span><span>" + x.pct + '%</span></div><div class="trk"><div class="fill f' + i +
+            '" style="width:' + x.pct + "%;background:var(--" + (i % 2 ? "P" : "POP") + ')"></div></div></div>').join("") + "</div>");
+          g.items.forEach((x, i) => { reveal(n.querySelector(".b" + i), x.t - 0.2, { y: 10 }); tl.fromTo(n.querySelector(".f" + i), { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power3.out", immediateRender: false }, x.t - 0.1); });
+        },
+        track(g) {    // {title, steps:[{t,text}]}
+          const n = card(g, ey(g) + "<h3>" + esc(g.title) + '</h3><div class="trk2"><div class="line"></div><div class="linef"></div>' + g.steps.map((s, i) => '<div class="s s' + i + '"><i></i>' + esc(s.text) + "</div>").join("") + "</div>");
+          const lf = n.querySelector(".linef"); gsap.set(lf, { height: (g.steps.length - 1) * 68, scaleY: 0 });
+          g.steps.forEach((s, i) => { reveal(n.querySelector(".s" + i), s.t - 0.1, { x: -16, y: 0 }); if (i) tl.fromTo(lf, { scaleY: (i - 1) / (g.steps.length - 1) }, { scaleY: i / (g.steps.length - 1), duration: 0.5, ease: "power2.out", immediateRender: false }, s.t - 0.2); });
+        },
+        big(g) {      // {a:{t,text}, b:{t,text}}
+          const n = card(g, ey(g) + '<div class="bigl la">' + esc(g.a.text) + '</div><div class="bigl lb" style="color:var(--P)">' + esc(g.b.text) + "</div>");
+          reveal(n.querySelector(".la"), g.a.t - 0.1, { y: 16 }); reveal(n.querySelector(".lb"), g.b.t - 0.1, { s: 0.85, y: 0, ease: "back.out(1.8)" });
+        },
+        score(g) {    // {title, players:[{name,val,t}]}
+          const n = card(g, ey(g) + "<h3>" + esc(g.title) + '</h3><div class="score">' + g.players.map((p, i) => '<div class="p"><div class="nm">' + esc(p.name) + '</div><div class="v v' + i + '">' + esc(p.val) + "</div></div>").join("") + "</div>");
+          g.players.forEach((p, i) => reveal(n.querySelector(".v" + i), p.t - 0.05, { s: 0.4, y: 0, ease: "back.out(2.6)" }));
+        },
+        stamp(g) {    // {t, text, tone:"pop|primary"}  slams onto the card
+          const c = cardOf(modeAt(g.t0 + 0.2)); const n = el('<div class="stamp" style="color:var(--' + (g.tone === "primary" ? "P" : "POP") + ')">' + esc(g.text) + "</div>");
+          centre(n, c[0] + c[2] / 2, c[1] + c[3] / 2 - 10, -7); gsap.set(n, { autoAlpha: 0 });
+          tl.fromTo(n, { autoAlpha: 0, scale: 1.7 }, { autoAlpha: 1, scale: 1, duration: 0.32, ease: "back.out(2.2)", immediateRender: false }, g.t - 0.12);
+          tl.to(n, { autoAlpha: 0, duration: 0.25, ease: OUT }, g.t1 - 0.25);
+        },
+        burst(g) {    // {t, text}  e.g. "10X": big number with rays, lands on the spoken number
+          const c = cardOf(modeAt(g.t0 + 0.2)); const n = el('<div class="burst">' + esc(g.text) + "</div>"); centre(n, c[0] + c[2] / 2, c[1] + c[3] / 2 - 10, -4);
+          gsap.set(n, { autoAlpha: 0 });
+          tl.fromTo(n, { autoAlpha: 0, scale: 0.3 }, { autoAlpha: 1, scale: 1, duration: 0.42, ease: "back.out(2.4)", immediateRender: false }, g.t - 0.1);
+          tl.to(n, { autoAlpha: 0, duration: 0.25, ease: OUT }, g.t1 - 0.25);
+        },
+        lane(g) { const n = el('<div class="lane"><span class="dot">' + ic(g.icon) + "</span>" + esc(g.text) + "</div>"); const c = cardOf(modeAt(g.t0 + 0.2)); css(n, { left: c[0] + 28 + "px", top: c[1] + 28 + "px" }); show(n, g.t0, g.t1, { s: 0.85, y: 0, ease: "back.out(1.6)" }); },
+      };
+      D.graphics.forEach((g) => { if (!R[g.type]) throw new Error("unknown graphic type " + g.type); R[g.type](g); });
+      /* @@TAIL@@ */
+      document.fonts.ready.then(() => { if (!document.fonts.check('900 40px "' + (BR.font || "Nunito") + '"')) throw new Error("brand font failed to load"); });
+    </script>
+  </body>
+</html>
